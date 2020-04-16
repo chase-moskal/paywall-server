@@ -4,6 +4,7 @@ import {PaywallPopupSettings} from "./interfaces.js"
 import {namespace} from "authoritarian/dist/business/paywall-popup/common.js"
 import {unpackCorsConfig} from "authoritarian/dist/toolbox/unpack-cors-config.js"
 import {validateRequest} from "authoritarian/dist/toolbox/popups/validate-request.js"
+import {PaywallPopupParameters, PaywallPopupPayload} from "authoritarian/dist/business/paywall-popup/interfaces.js"
 import {PopupFlag, PopupReadyResponse, PopupMessageEvent, PopupGoRequest, PopupPayloadResponse} from "authoritarian/dist/toolbox/popups/interfaces.js"
 
 declare global {
@@ -12,27 +13,12 @@ declare global {
 	}
 }
 
-export interface PaywallPopupParameters {
-	userId: string
-	stripePlanId: string
-}
-
-export interface PaywallPopupPayload {
-	active: boolean
-}
-
 ~async function main() {
 	const {settings} = window
-	const {search} = window.location
-	const success = search.endsWith("success")
-	const cancel = search.endsWith("cancel")
+	const {hash} = window.location
+	const success = hash.endsWith("success")
+	const cancel = hash.endsWith("cancel")
 	const initial = !(success || cancel)
-
-	// SEND POSTMESSAGE BROADCAST ReadyResponse
-	opener.postMessage(<PopupReadyResponse>{
-		namespace,
-		flag: PopupFlag.ReadyResponse
-	}, "*")
 
 	if (initial) {
 		const cors = unpackCorsConfig(settings.cors)
@@ -62,8 +48,8 @@ export interface PaywallPopupPayload {
 			// construct callback url's for stripe (this page but with querystring)
 			const {protocol, host, pathname} = window.location
 			const baseUrl = `${protocol}//${host}${pathname}`
-			const cancelUrl = `${baseUrl}?cancel`
-			const successUrl = `${baseUrl}?success`
+			const cancelUrl = `${baseUrl}#cancel`
+			const successUrl = `${baseUrl}#success`
 	
 			// initiate the stripe redirection flow
 			const stripe = await loadStripe(settings.stripeApiKey)
@@ -88,11 +74,17 @@ export interface PaywallPopupPayload {
 
 			// SEND POSTMESSAGE PayloadResponse
 			// - active: boolean
-			opener.postMessage(<PopupPayloadResponse<undefined>>{
+			opener.postMessage(<PopupPayloadResponse<PaywallPopupPayload>>{
 				namespace,
 				payload: {active},
 				flag: PopupFlag.PayloadResponse,
 			}, event.origin)
 		})
 	}
+
+	// SEND POSTMESSAGE BROADCAST ReadyResponse
+	opener.postMessage(<PopupReadyResponse>{
+		namespace,
+		flag: PopupFlag.ReadyResponse
+	}, "*")
 }().catch(error => console.error(error))
