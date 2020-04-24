@@ -1,7 +1,13 @@
 
+debug: true
+
 paywallServer:
   port: 8003
   stripeApiKey: pk_test_NEDtuftU6ziXyM4Y6PDrifPl00g6q5efYe
+  stripeSecret: sk_test_Pj55B8JGeQyJeMxhcRc3ljEs00V9zwM3FA
+  # stripeWebhooksSecret: whsec_SrKCbLQwiQ1r2lAOzcbiZqldu1qwkJVh
+  stripeWebhooksSecret: whsec_0xVpgCAoXsXUmlalCAMFRCWnRNaiGJ0x
+  premiumSubscriptionStripePlanId: plan_H5oUIjw9895qDj
 
 mongo:
   link: mongodb+srv://developer:eAQiCvYa2nQLKVPZ@devcluster-g4uwh.mongodb.net/test?retryWrites=true&w=majority
