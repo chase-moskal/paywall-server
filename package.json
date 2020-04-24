@@ -28,7 +28,7 @@
 	"dependencies": {
 		"@koa/cors": "^3.0.0",
 		"@stripe/stripe-js": "^1.4.0",
-		"authoritarian": "0.0.0-dev.51",
+		"authoritarian": "0.0.0-dev.52",
 		"importly": "0.1.0-dev.0",
 		"js-yaml": "^3.13.1",
 		"koa": "^2.11.0",
@@ -37,7 +37,7 @@
 		"mongodb": "^3.5.5",
 		"pug": "^2.0.4",
 		"redcrypto": "0.0.0-dev.5",
-		"renraku": "0.0.0-dev.26",
+		"renraku": "0.0.0-dev.28",
 		"stripe": "^8.46.0"
 	},
 	"devDependencies": {
