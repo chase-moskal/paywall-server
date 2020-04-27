@@ -20,6 +20,7 @@ import {makeAuthVanguard} from "authoritarian/dist/business/auth-api/vanguard.js
 import {makeStripeLiaison} from "authoritarian/dist/business/paywall/stripe-liaison.js"
 import {makeStripeWebhooks} from "authoritarian/dist/business/paywall/stripe-webhooks.js"
 import {makePaywallOverlord} from "authoritarian/dist/business/paywall/paywall-overlord.js"
+import {makeStripeDatalayer} from "authoritarian/dist/business/paywall/stripe-datalayer.js"
 import {makeBillingDatalayer} from "authoritarian/dist/business/paywall/billing-datalayer.js"
 import {mongoUserDatalayer} from "authoritarian/dist/business/auth-api/mongo-user-datalayer.js"
 
@@ -54,26 +55,28 @@ const paths = {
 		)
 	}
 
-	const stripe = new Stripe(stripeSecret, {apiVersion: "2020-03-02"})
 	const database = await connectMongo(config.mongo)
 	const userDatalayer = mongoUserDatalayer(database.collection("users"))
 	const {authVanguard} = makeAuthVanguard({userDatalayer})
-	const billing = makeBillingDatalayer({
-		stripe,
+
+	const stripe = new Stripe(stripeSecret, {apiVersion: "2020-03-02"})
+	const stripeDatalayer = makeStripeDatalayer({stripe})
+	const billingDatalayer = makeBillingDatalayer({
+		stripeDatalayer,
 		collection: database.collection("stripeBilling"),
 	})
 	const paywallOverlord = makePaywallOverlord({authVanguard})
 	const stripeWebhooks = makeStripeWebhooks({
 		logger,
-		stripe,
-		billing,
 		paywallOverlord,
+		stripeDatalayer,
+		billingDatalayer,
 	})
 	const stripeLiaison = makeStripeLiaison({
-		stripe,
-		billing,
 		verifyToken,
+		stripeDatalayer,
 		paywallOverlord,
+		billingDatalayer,
 		premiumSubscriptionStripePlanId,
 	})
 
@@ -85,6 +88,7 @@ const paths = {
 					settings: <PaywallPopupSettings>{
 					stripeApiKey,
 					cors: config.cors,
+					premiumSubscriptionStripePlanId,
 				}
 			})
 		}))
